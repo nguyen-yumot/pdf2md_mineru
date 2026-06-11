@@ -18,6 +18,21 @@ uv run main.py downloads/example.pdf
 
 `uv sync` builds the virtual environment from `pyproject.toml` and `uv.lock`. You can skip it — any `uv run` command syncs first automatically — but running it once up front makes the (sizable) MinerU model download explicit.
 
+## Setup on a new computer
+
+```bash
+brew install uv                  # or: curl -LsSf https://astral.sh/uv/install.sh | sh
+git clone https://github.com/nguyen-yumot/pdf2md_mineru.git && cd pdf2md_mineru
+uv sync                          # exact environment from uv.lock (Python included)
+uv run main.py some.pdf          # first run downloads ~5 GB of models, then converts
+```
+
+Notes:
+
+- **Models are not in the repo.** MinerU downloads them to `~/.cache/huggingface/` automatically on first conversion (internet required, allow ~20 GB free disk per upstream guidance). To pre-fetch them explicitly: `uv run mineru-models-download`.
+- **Match the memory setting to the machine.** `main.py` defaults `MINERU_VIRTUAL_VRAM_SIZE=16`, sized for a 32 GB Mac. On a 16 GB machine, `export MINERU_VIRTUAL_VRAM_SIZE=8`; with 64 GB or more, try `24`–`32`.
+- **Hardware**: the MLX fast path needs Apple Silicon and macOS ≥ 14. On Intel Macs or Linux, MinerU falls back to transformers/CUDA/CPU automatically — same commands, different speed.
+
 ## Converting documents
 
 `main.py` is a thin wrapper around the `mineru` CLI with Mac-friendly defaults (see [Performance on Mac](#performance-on-mac)):
